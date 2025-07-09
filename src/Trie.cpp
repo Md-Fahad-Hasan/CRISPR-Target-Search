@@ -1,40 +1,16 @@
 #include "Trie.h"
 #include <iostream>
 
-using namespace std;
-
-TrieNode::TrieNode() : isEndOfSequence(false) {}
-
-TrieNode::~TrieNode()
-{
-    for (auto &pair : children)
-    {
-        delete pair.second;
-    }
-}
-
 Trie::Trie() : root(new TrieNode()) {}
 
 Trie::~Trie()
 {
-    deleteTrie(root);
-}
-
-void Trie::deleteTrie(TrieNode *node)
-{
-    if (!node)
-        return;
-    for (auto &pair : node->children)
-    {
-        deleteTrie(pair.second);
-    }
-    delete node;
+    delete root;
 }
 
 void Trie::insertSequence(const string &sequence)
 {
     TrieNode *current = root;
-
     for (char nucleotide : sequence)
     {
         if (current->children.find(nucleotide) == current->children.end())
@@ -43,15 +19,13 @@ void Trie::insertSequence(const string &sequence)
         }
         current = current->children[nucleotide];
     }
-
     current->isEndOfSequence = true;
     current->sequences.push_back(sequence);
 }
 
 bool Trie::searchExact(const string &sequence) const
 {
-    const TrieNode *current = root;
-
+    TrieNode *current = root;
     for (char nucleotide : sequence)
     {
         if (current->children.find(nucleotide) == current->children.end())
@@ -60,14 +34,13 @@ bool Trie::searchExact(const string &sequence) const
         }
         current = current->children.at(nucleotide);
     }
-
-    return current != nullptr && current->isEndOfSequence;
+    return current->isEndOfSequence;
 }
 
 vector<string> Trie::searchPrefix(const string &prefix) const
 {
     vector<string> results;
-    const TrieNode *current = root;
+    TrieNode *current = root;
 
     for (char nucleotide : prefix)
     {
@@ -82,7 +55,7 @@ vector<string> Trie::searchPrefix(const string &prefix) const
     return results;
 }
 
-void Trie::collectSequences(const TrieNode *node, vector<string> &results) const
+void Trie::collectSequences(TrieNode *node, vector<string> &results) const
 {
     if (node->isEndOfSequence)
     {

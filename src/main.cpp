@@ -1,58 +1,124 @@
 #include <iostream>
-#include "Trie.h"
+#include "CRISPRSearch.h"
+#include "DNASequence.h"
 
 using namespace std;
 
-void showMenu()
+void displayMenu()
 {
-    cout << "\nCRISPR Target Finder\n";
-    cout << "1. Add DNA sequence\n";
-    cout << "2. Check exact match\n";
-    cout << "3. Exit\n";
-    cout << "Choose option: ";
+    cout << "\nCRISPR Target Search System\n";
+    cout << "1. Load DNA sequences from file\n";
+    cout << "2. Generate random DNA sequences\n";
+    cout << "3. Search for exact match (CRISPR perfect match)\n";
+    cout << "4. Search for prefix match (CRISPR partial match)\n";
+    cout << "5. Search for substring match (General DNA search)\n";
+    cout << "6. Display all loaded sequences\n";
+    cout << "7. Exit\n";
+    cout << "Enter your choice: ";
+}
+
+void printResults(const vector<string> &results, const string &searchType)
+{
+    if (results.empty())
+    {
+        cout << "No " << searchType << " matches found.\n";
+        return;
+    }
+
+    cout << "Found " << results.size() << " " << searchType << " match(es):\n";
+    for (size_t i = 0; i < results.size(); ++i)
+    {
+        cout << i + 1 << ". " << results[i] << "\n";
+    }
 }
 
 int main()
 {
-    Trie dnaDB;
+    CRISPRSearch searchSystem;
     int choice;
-    string sequence;
+    string input;
 
-    while (true)
+    do
     {
-        showMenu();
+        displayMenu();
         cin >> choice;
+        cin.ignore();
 
-        if (choice == 1)
+        try
         {
-            cout << "Enter DNA sequence to add (A,T,G,C only): ";
-            cin >> sequence;
-            dnaDB.insert(sequence);
-            cout << "Added!\n";
-        }
-        else if (choice == 2)
-        {
-            cout << "Enter sequence to search: ";
-            cin >> sequence;
-            if (dnaDB.search(sequence))
+            switch (choice)
             {
-                cout << "Match found!\n";
-            }
-            else
+            case 1:
             {
-                cout << "No match found.\n";
+                cout << "Enter filename (in data/ directory): ";
+                string filename;
+                getline(cin, filename);
+                auto sequences = DNASequence::loadSequencesFromFile("data/" + filename);
+                searchSystem.loadDNASequences(sequences);
+                cout << "Loaded " << sequences.size() << " valid DNA sequences.\n";
+                break;
+            }
+
+            case 2:
+            {
+                int count, minLen, maxLen;
+                cout << "Number of sequences to generate: ";
+                cin >> count;
+                cout << "Minimum length: ";
+                cin >> minLen;
+                cout << "Maximum length: ";
+                cin >> maxLen;
+
+                auto sequences = DNASequence::generateRandomSequences(count, minLen, maxLen);
+                searchSystem.loadDNASequences(sequences);
+                cout << "Generated and loaded " << sequences.size() << " random DNA sequences.\n";
+                break;
+            }
+
+            case 3:
+            {
+                cout << "Enter guide RNA for exact match: ";
+                getline(cin, input);
+                printResults(searchSystem.findExactMatches(input), "exact");
+                break;
+            }
+
+            case 4:
+            {
+                cout << "Enter prefix for partial match: ";
+                getline(cin, input);
+                printResults(searchSystem.findPrefixMatches(input), "prefix");
+                break;
+            }
+
+            case 5:
+            {
+                cout << "Enter substring to search: ";
+                getline(cin, input);
+                printResults(searchSystem.findSubstringMatches(input), "substring");
+                break;
+            }
+
+            case 6:
+            {
+                auto allSeqs = searchSystem.getAllSequences();
+                printResults(allSeqs, "loaded sequence");
+                break;
+            }
+
+            case 7:
+                cout << "Exiting program.\n";
+                break;
+
+            default:
+                cout << "Invalid choice. Please try again.\n";
             }
         }
-        else if (choice == 3)
+        catch (const exception &e)
         {
-            cout << "Goodbye!\n";
-            break;
+            cerr << "Error: " << e.what() << "\n";
         }
-        else
-        {
-            cout << "Invalid choice. Try again.\n";
-        }
-    }
+    } while (choice != 7);
 
     return 0;
 }
