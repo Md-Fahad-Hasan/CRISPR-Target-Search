@@ -1,0 +1,12 @@
+>human_gene_1
+ATGCGTACGTAGCTAGCT
+>bacterial_sequence_1
+GGGATCCCTAGCTA
+>random_sequence
+TTTTAAAACCCCGGGG
+>human_gene_2
+ATGCGTACGTAGCTAGCT
+>repeat_sequence
+CATCATCATCAT
+>test_sequence
+GATTACA
