@@ -1,7 +1,7 @@
 #ifndef TRIE_H
 #define TRIE_H
 
-#include <map>
+#include <unordered_map>
 #include <vector>
 #include <string>
 
@@ -10,52 +10,28 @@ using namespace std;
 class TrieNode
 {
 public:
-    map<char, TrieNode *> children;
-    bool isEnd;
+    unordered_map<char, TrieNode *> children;
+    bool isEndOfSequence;
+    vector<string> sequences;
 
-    TrieNode()
-    {
-        isEnd = false;
-    }
+    TrieNode() : isEndOfSequence(false) {}
 };
 
 class Trie
 {
-public:
+private:
     TrieNode *root;
 
-    Trie()
-    {
-        root = new TrieNode();
-    }
+    void collectSequences(TrieNode *node, vector<string> &results) const;
 
-    void insert(string word)
-    {
-        TrieNode *current = root;
-        for (char c : word)
-        {
-            if (current->children.count(c) == 0)
-            {
-                current->children[c] = new TrieNode();
-            }
-            current = current->children[c];
-        }
-        current->isEnd = true;
-    }
+public:
+    Trie();
+    ~Trie();
 
-    bool search(string word)
-    {
-        TrieNode *current = root;
-        for (char c : word)
-        {
-            if (current->children.count(c) == 0)
-            {
-                return false;
-            }
-            current = current->children[c];
-        }
-        return current->isEnd;
-    }
+    void insertSequence(const string &sequence);
+    bool searchExact(const string &sequence) const;
+    vector<string> searchPrefix(const string &prefix) const;
+    vector<string> getAllSequences() const;
 };
 
 #endif
